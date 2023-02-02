@@ -1,1 +1,13 @@
 {% extends "app/header_layout.html" %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center">
+    <div class="row">
+        <form class="text-center centered" style="width: 600px">
+            <label for="formFileMultiple" class="form-label">Multiple files input example</label>
+            <input class="form-control" type="file" id="formFileMultiple" multiple>
+            <button type="submit" class="btn btn-primary my-3">Convert</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
