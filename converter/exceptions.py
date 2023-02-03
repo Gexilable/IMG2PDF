@@ -1,0 +1,2 @@
+class ConvertImageError(Exception):
+    pass
