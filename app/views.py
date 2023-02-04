@@ -1,8 +1,10 @@
-import io
+from django.contrib import messages as msg
 
-from django.shortcuts import render
-from django.http import FileResponse, Http404
+from django.shortcuts import render, redirect
+from django.http import FileResponse
 
+from converter import PdfConverter
+from converter.exceptions import ConvertImageError
 
 
 def index(request):
@@ -10,7 +12,13 @@ def index(request):
 
 
 def convert(request):
+    images = request.FILES.getlist("images", [])
+    if not images:
+        msg.error(request, "No file was selected")
+        return redirect("app:index")
     try:
-        return FileResponse(io.BytesIO(b"123"), content_type="application/pdf")
-    except FileNotFoundError:
-        raise Http404()
+        pdf = PdfConverter(images).convert()
+        return FileResponse(pdf, content_type="application/pdf")
+    except ConvertImageError:
+        msg.error(request, "Invalid File")
+        return redirect("app:index")
