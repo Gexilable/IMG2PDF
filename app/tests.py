@@ -5,6 +5,7 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.messages import get_messages
+from pypdf import PdfReader
 
 
 class TestConvertView(TestCase):
@@ -37,15 +38,23 @@ class TestConvertView(TestCase):
         response = self.client.post(self.url, {"images": self._get_image()})
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers["Content-Type"], "application/pdf")
+        self.assertPdfPages(1, response)
 
     def test_send_multiple_files_return_pdf_file_with_multiple_pages(self):
-        response = self.client.post(self.url, {"images": [self._get_image(), self._get_image()]})
+        response = self.client.post(
+            self.url, {"images": [self._get_image(), self._get_image()]}
+        )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.headers["Content-Type"], "application/pdf")
+        self.assertPdfPages(2, response)
 
     def assertMessageIn(self, message, response):
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(message, messages)
+
+    def assertPdfPages(self, number_of_pages, response):
+        pdf = PdfReader(io.BytesIO(response.getvalue()))
+        self.assertEqual(len(pdf.pages), number_of_pages)
 
     def _get_image(self, name: str = "test_img.png"):
         folder = Path(__file__).parent
