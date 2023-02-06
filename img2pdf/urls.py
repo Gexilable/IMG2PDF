@@ -24,24 +24,18 @@ urlpatterns = [
     path("", include("app.urls")),
     path(
         "login/",
-        LoginView.as_view(
-            template_name="app/login.html",
-            next_page="/"
-        ),
+        LoginView.as_view(template_name="app/login.html", next_page="/"),
     ),
     path(
         "register/",
         CreateView.as_view(
             template_name="app/register.html",
             form_class=UserCreationForm,
-            success_url="/",
+            success_url="/login/",
         ),
     ),
     path(
         "logout/",
-        LogoutView.as_view(
-        next_page="/"
-        ),
-
+        LogoutView.as_view(next_page="/"),
     ),
 ]
