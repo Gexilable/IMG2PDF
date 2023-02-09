@@ -114,3 +114,30 @@ class TestConvertGeneratedFile(LoggedInConvertTestCase):
         generated = GeneratedFile.objects.first()
         self.assertEqual(generated.filename, "test.ext.pdf")
 
+
+class TestHistory(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username="test", password="test")
+
+    def test_anonymous_user_does_not_have_history(self):
+        GeneratedFile.objects.create(value=b"123", user=self.user)
+        anonymous_user = AnonymousUser()
+        history = GeneratedFile.get_history(anonymous_user)
+        self.assertEqual(history, [])
+
+    def test_logged_in_user_does_not_have_history(self):
+        history = GeneratedFile.get_history(self.user)
+        self.assertEqual(history, [])
+
+    def test_logged_in_user_has_own_history(self):
+        file = GeneratedFile.objects.create(value=b"123", user=self.user)
+        history = GeneratedFile.get_history(self.user)
+        self.assertIn(file, history)
+
+    def test_user_has_not_another_user_history(self):
+        self.user2 = User.objects.create_user(username="test2", password="test2")
+        file1 = GeneratedFile.objects.create(value=b"123", user=self.user)
+        file2 = GeneratedFile.objects.create(value=b"123", user=self.user2)
+        history1 = GeneratedFile.get_history(self.user)
+        self.assertIn(file1, history1)
+        self.assertNotIn(file2, history1)
