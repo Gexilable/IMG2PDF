@@ -6,6 +6,8 @@ from django.http import FileResponse
 from converter import PdfConverter
 from converter.exceptions import ConvertImageError
 
+from .models import GeneratedFile
+
 
 def index(request):
     return render(request, "app/index.html")
@@ -18,7 +20,20 @@ def convert(request):
         return redirect("app:index")
     try:
         pdf = PdfConverter(images).convert()
+        if not request.user.is_anonymous:
+            imagename = get_name_of_first_image(images)
+            GeneratedFile.objects.create(
+                filename=f"{imagename}.pdf",
+                value=pdf.getvalue(),
+                user=request.user,
+            )
         return FileResponse(pdf, content_type="application/pdf")
     except ConvertImageError:
         msg.error(request, "Invalid File")
         return redirect("app:index")
+
+
+def get_name_of_first_image(images: list):
+    if not images:
+        return ""
+    return images[0].name.rsplit(".", 1)[0]
