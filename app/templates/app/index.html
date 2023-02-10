@@ -36,10 +36,12 @@
         <h4 class="fw-bold my-3 text-center">Your history</h4>
         <ul class="list-group">
             {% for pdf in history %}
-            <a href="#" class="list-group-item list-group-item-action">
+            <a href="/pdf/{{ pdf.id }}" class="list-group-item list-group-item-action">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">{{ pdf.filename }}</h5>
                 </div>
+                <small class="text-muted">Click here to download</small>
+
             </a>
             {% endfor %}
         </ul>

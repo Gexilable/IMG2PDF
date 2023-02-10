@@ -1,7 +1,10 @@
+import io
+
 from django.contrib import messages as msg
+from django.core.exceptions import ObjectDoesNotExist
 
 from django.shortcuts import render, redirect
-from django.http import FileResponse
+from django.http import FileResponse, HttpResponse
 
 from converter import PdfConverter
 from converter.exceptions import ConvertImageError
@@ -38,3 +41,11 @@ def get_name_of_first_image(images: list):
     if not images:
         return ""
     return images[0].name.rsplit(".", 1)[0]
+
+
+def get_pdf(request, id):
+    try:
+        pdf = GeneratedFile.objects.get(id=id, user=request.user.id).value
+        return FileResponse(io.BytesIO(pdf), content_type="application/pdf")
+    except ObjectDoesNotExist:
+        return HttpResponse(status=404)
