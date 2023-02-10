@@ -10,7 +10,8 @@ from .models import GeneratedFile
 
 
 def index(request):
-    return render(request, "app/index.html")
+    history = GeneratedFile.get_history(request.user)
+    return render(request, "app/index.html", context={"history": history})
 
 
 def convert(request):
