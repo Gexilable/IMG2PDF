@@ -49,3 +49,8 @@ def get_pdf(request, id):
         return FileResponse(io.BytesIO(pdf), content_type="application/pdf")
     except ObjectDoesNotExist:
         return HttpResponse(status=404)
+
+
+def delete_file(request, id):
+    GeneratedFile.objects.filter(id=id, user=request.user.id).delete()
+    return redirect("app:index")

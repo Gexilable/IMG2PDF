@@ -1,7 +1,7 @@
 import io
 from pathlib import Path
 
-from django.contrib.auth import login
+
 from django.contrib.auth.models import User, AnonymousUser
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -42,11 +42,16 @@ class ConvertTestCase(TestCase):
         )
 
 
-class LoggedInConvertTestCase(ConvertTestCase):
-    def setUp(self) -> None:
-        super().setUp()
+class LoggedIn(TestCase):
+    def login(self):
         self.user = User.objects.create_user(username="test", password="test")
         self.client.login(username="test", password="test")
+
+
+class LoggedInConvertTestCase(ConvertTestCase, LoggedIn):
+    def setUp(self) -> None:
+        super().setUp()
+        self.login()
 
 
 class TestConvertView(ConvertTestCase):
@@ -141,3 +146,14 @@ class TestHistory(TestCase):
         history1 = GeneratedFile.get_history(self.user)
         self.assertIn(file1, history1)
         self.assertNotIn(file2, history1)
+
+
+class TestDeleteGeneratedFile(LoggedIn):
+    def setUp(self) -> None:
+        self.login()
+
+    def test_delete_file(self):
+        file = GeneratedFile.objects.create(value=b"123", user=self.user)
+        self.client.post(reverse("app:delete_pdf", args=[file.id]))
+        deleted_file = GeneratedFile.objects.filter(id=file.id).all()
+        self.assertFalse(deleted_file)
